@@ -3,6 +3,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import "../utils/plugin"
 import { Log } from '@abner/log';
+import { RouterConfig, TokenManager } from '@hm/basic';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -18,8 +19,14 @@ export default class EntryAbility extends UIAbility {
     Log.info('Ability onWindowStageCreate');
     const sub = await windowStage.createSubWindow('add_win')
     sub.showWindow()
-    sub.setUIContent('@bundle:com.yang.yanglao.pro/home/ets/pages/Splash/Splash') // 设置路径 跨包页面加载
-    windowStage.loadContent('pages/Index');
+    sub.setUIContent(RouterConfig.SPLASH_URL) // 设置路径 跨包页面加载
+    TokenManager.context = this.context
+    if ((await TokenManager.getUser()).token) {
+      windowStage.loadContent('pages/Index');
+    } else {
+      windowStage.loadContent(RouterConfig.LOGIN_URL)
+    }
+
   }
 
   onWindowStageDestroy(): void {

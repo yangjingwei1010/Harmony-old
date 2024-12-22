@@ -1,6 +1,6 @@
 export class RouterConfig {
   // 基础
-  static BUNDLE: string = 'com.hm.elderly.plus'
+  static BUNDLE: string = 'com.yang.yanglao.pro'
   static readonly SPLASH_URL: string = `@bundle:${RouterConfig.BUNDLE}/home/ets/pages/Splash/Splash`
   static readonly LOGIN_URL: string = `@bundle:${RouterConfig.BUNDLE}/mine/ets/pages/Login/Login`
   static readonly USER_SET_URL: string = `@bundle:${RouterConfig.BUNDLE}/mine/ets/pages/Setting/Setting`

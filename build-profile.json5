@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storePassword": "0000001AD685785AEF79EDEAA955B0ECF43AC4FFA23EBDBE4311C863B13BA8E636761F93103766AECD4F",
+          "certpath": "/Users/weiqingyuan/Desktop/hongmeng/mydemo/kecheng/key/yanglao/yanglao.cer",
+          "keyAlias": "yanglao",
+          "keyPassword": "0000001AA48C66C4216E044608F5B8E94C7FAA374FF2F6437E153D900354B5538D9C75CC5BB635AE4C8E",
+          "profile": "/Users/weiqingyuan/Desktop/hongmeng/mydemo/kecheng/key/yanglao/yanglaoDebug.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/weiqingyuan/Desktop/hongmeng/mydemo/kecheng/key/yanglao/yanglao.p12"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
