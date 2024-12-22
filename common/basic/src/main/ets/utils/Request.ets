@@ -1,6 +1,9 @@
 // 导出封装的axios的实例
 import { Log } from '@abner/log'
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from '@ohos/axios'
+import { TokenManager } from '.'
+import { router } from '@kit.ArkUI'
+import { RouterConfig } from '../constants/RouterConfig'
 
 // 创建一个axios的实例
 const instance = axios.create({
@@ -9,12 +12,17 @@ const instance = axios.create({
 })
 
 // 两个拦截器
-instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   // config就是请求的参数 地址 以及一些头信息
   // 一般在这个位置统一注入token
   Log.info("1.请求参数：" + JSON.stringify(config))
+  // todo: 替换token
   config.headers.Authorization =
     'eyJhbGciOiJIUzI1NiJ9.eyJjdXJyZW50VXNlciI6IntcInVzZXJuYW1lXCI6XCIzNTQyMzQ4NEBxcS5jb21cIixcInBhc3N3b3JkXCI6XCJcIixcIm5pY2tOYW1lXCI6XCLmiqTnkIblkZgxXCIsXCJlbWFpbFwiOlwiMzU0MjM0ODRAcXEuY29tXCIsXCJyZWFsTmFtZVwiOlwi5oqk55CG5ZGYMVwiLFwibW9iaWxlXCI6XCIxODIxMTAyMTg5NlwiLFwic2V4XCI6XCIwXCIsXCJkZXB0Tm9cIjpcIjEwMDAwMTAwNTAwMDAwMFwiLFwicG9zdE5vXCI6XCIxMDAwMDEwMDUwMDMwMDBcIixcImRhdGFTdGF0ZVwiOlwiMFwiLFwiYXZhdGFyXCI6XCJodHRwczovL3lqeS1vc3MtdmlkZW9zLm9zcy1hY2NlbGVyYXRlLmFsaXl1bmNzLmNvbS9ncnp4aHouanBnXCIsXCJpZFwiOjE2NzE0MDMyNTY1MTkwNzgyNzUsXCJjcmVhdGVUaW1lXCI6MTcxNTU2ODM5MDAwMCxcInVwZGF0ZVRpbWVcIjoxNzE1NTY4MzkwMDAwLFwiY3JlYXRlQnlcIjoxNjcxNDAzMjU2NTE5MDc4MTM4fSIsImV4cCI6MTQ2NzU2NTk0Nzd9.8PrMKBNrVVCfcI4DgICxp6oBQGqy46m3oglFQCiKtzw'
+  const user = await TokenManager.getUser()
+  if (user.token) {
+    config.headers.Authorization = user.token
+  }
   return config // 返回的这个参数是必须的 axios就是用我们返回的这个config发送请求
 }, (error: AxiosError) => {
   // 说明失败了
@@ -36,7 +44,17 @@ instance.interceptors.response.use((response: AxiosResponse) => {
   return response.data.data // 直接返回我们需要的数据
 
 }, (error: AxiosError) => {
-  AlertDialog.show({ message: error.message }) // 弹出错误信息
+  // 4xx 5xx会走到axios的响应拦截器的错误回调函数中
+  if (error.response?.status === 401) {
+    // 说明登录失效了 因为有效期为180天 没必要重新用复活 直接重新登录即可
+    TokenManager.delUser() // 删除原有token
+    router.replaceUrl({
+      url: RouterConfig.LOGIN_URL
+    })
+  } else {
+    // 除401之外的错误可以弹出显示
+    AlertDialog.show({ message: error.message }) // 弹出错误信息
+  }
   Log.error("3.异常信息：" + JSON.stringify(error))
   return Promise.reject(error)
 

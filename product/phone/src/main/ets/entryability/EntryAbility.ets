@@ -21,7 +21,7 @@ export default class EntryAbility extends UIAbility {
     sub.showWindow()
     sub.setUIContent(RouterConfig.SPLASH_URL) // 设置路径 跨包页面加载
     TokenManager.context = this.context
-    if ((await TokenManager.getUser()).token) {
+    if (!(await TokenManager.getUser()).token) {
       windowStage.loadContent('pages/Index');
     } else {
       windowStage.loadContent(RouterConfig.LOGIN_URL)

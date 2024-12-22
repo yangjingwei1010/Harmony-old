@@ -1,5 +1,5 @@
 import router from '@ohos.router'
-import { ResManager } from '@hm/basic/Index'
+import { DeviceBuilder, ResManager } from '@hm/basic/Index'
 
 @Component
 export struct Mine {
@@ -43,7 +43,12 @@ export struct Mine {
             .aspectRatio(1)
             .borderRadius(37)
             .border({ width: 5, color: '#AEE8E4' })
-            .shadow({ offsetX: 0, offsetY: 2, radius: 21, color: '#0aa9941f' })
+            .shadow({
+              offsetX: 0,
+              offsetY: 2,
+              radius: 21,
+              color: '#0aa9941f'
+            })
           Text('刘大壮')
             .fontSize(ResManager.EC_PAGE_TITLE_FS)
             .fontColor(ResManager.EC_MID_BLACK)
@@ -72,13 +77,10 @@ export struct Mine {
           //   .height(16)
         }
         .width('100%')
+        .margin({ bottom: 10 })
 
         // 导航：设备管理
-        Row({ space: 10 }) {
-
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
+        DeviceBuilder()
 
       }
       .margin({ top: -80, left: ResManager.EC_CONTENT_SPACE, right: ResManager.EC_CONTENT_SPACE })
