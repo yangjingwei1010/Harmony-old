@@ -3,13 +3,10 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import "../utils/plugin"
 import { Log } from '@abner/log';
-import { instance } from '@hm/basic';
-
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     Log.info('Ability onDestroy');
-
   }
 
   onDestroy(): void {

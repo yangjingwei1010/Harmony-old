@@ -1,6 +1,6 @@
 // 导出封装的axios的实例
 import { Log } from '@abner/log'
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from '@ohos/axios'
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from '@ohos/axios'
 
 // 创建一个axios的实例
 const instance = axios.create({
@@ -42,4 +42,6 @@ instance.interceptors.response.use((response: AxiosResponse) => {
 
 }) // 注册响应拦截器- 数据回来，有些东西是不是没有必要啊 没有必要 就脱掉 去掉 删掉
 
-export { instance }
+export function request<Response = null, DataParams = null>(config: AxiosRequestConfig) {
+  return instance<null, Response, DataParams>(config)
+}
