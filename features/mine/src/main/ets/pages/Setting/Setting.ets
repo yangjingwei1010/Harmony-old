@@ -14,7 +14,12 @@ struct Setting {
   // 上传弹层控制
   uploadDialog: CustomDialogController = new CustomDialogController({
     // 使用自定义弹层组件
-    builder: EcDialogUpload({}),
+    builder: EcDialogUpload({
+      callback: (url) => {
+        this.user.avatar = url
+        this.uploadDialog.close()
+      }
+    }),
     alignment: DialogAlignment.Bottom
   })
   @State
