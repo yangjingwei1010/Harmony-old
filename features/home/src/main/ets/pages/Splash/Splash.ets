@@ -1,5 +1,5 @@
 import { ResManager } from '@hm/basic/Index'
-import { router } from '@kit.ArkUI'
+import { router, window } from '@kit.ArkUI'
 
 @Entry
 @Component
@@ -7,7 +7,7 @@ struct Splash {
   @StorageProp('bottomHeight')
   bottomHeight: number = 0
   @State
-  count: number = 6
+  count: number = 2
   timer: number = -1
 
   countdown() {
@@ -15,9 +15,8 @@ struct Splash {
       this.count--
       if (this.count === 0) {
         clearInterval(this.timer)
-        router.pushUrl({
-          url: 'pages/Index'
-        })
+        window.findWindow('add_win').destroyWindow()
+        return
       }
     }, 1000)
   }

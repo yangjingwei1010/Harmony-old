@@ -13,17 +13,13 @@ export default class EntryAbility extends UIAbility {
     Log.info('Ability onDestroy');
   }
 
-  onWindowStageCreate(windowStage: window.WindowStage): void {
+  async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
     // Main window is created, set main page for this ability
     Log.info('Ability onWindowStageCreate');
-
-    windowStage.loadContent('pages/Index', (err, data) => {
-      if (err.code) {
-        Log.error('Failed to load the content. Cause: %{public}s' + JSON.stringify(err) ?? '');
-        return;
-      }
-      Log.info('Succeeded in loading the content. Data: %{public}s' + JSON.stringify(data) ?? '');
-    });
+    const sub = await windowStage.createSubWindow('add_win')
+    sub.showWindow()
+    sub.setUIContent('@bundle:com.yang.yanglao.pro/home/ets/pages/Splash/Splash') // 设置路径 跨包页面加载
+    windowStage.loadContent('pages/Index');
   }
 
   onWindowStageDestroy(): void {
