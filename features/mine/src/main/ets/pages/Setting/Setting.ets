@@ -1,6 +1,10 @@
 import router from '@ohos.router'
-import { EcDialogUpload, ResManager } from '@hm/basic/Index'
+import { EcDialogUpload, ResManager, UserData, UserDataModel } from '@hm/basic/Index'
 
+enum ShowType {
+  NICKNAME,
+  AVATAR
+}
 
 @Entry
 @Component
@@ -13,18 +17,28 @@ struct Setting {
     builder: EcDialogUpload({}),
     alignment: DialogAlignment.Bottom
   })
+  @State
+  user: UserDataModel = new UserDataModel({} as UserData)
+
+  aboutToAppear(): void {
+    const params = router.getParams() as UserDataModel
+    if (params) {
+      // 一定得判断 因为鸿蒙里面没有传值的情况下 params是个undefined
+      this.user = params
+    }
+  }
 
   @Builder
-  cellItem(title: string, rightContent: string = '') {
+  cellItem(title: string, type: ShowType) {
     Row() {
       Text(title)
         .fontColor(ResManager.EC_MID_19)
         .fontSize(ResManager.EC_MODULE_TITLE_FS)
         .fontWeight(500)
       Row({ space: 10 }) {
-        if (rightContent) {
+        if (type === ShowType.NICKNAME) {
           // 昵称修改
-          Text(rightContent)
+          Text(this.user.nickName || '未命名')
             .fontColor(ResManager.EC_MID_59)
             .fontSize(ResManager.EC_NORMAL_FS)
             .onClick(() => {
@@ -34,7 +48,8 @@ struct Setting {
             })
         } else {
           // 上传
-          Image('https://img2.baidu.com/it/u=130573784,2479509663&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=534')
+          Image(this.user.avatar ||
+            'https://img2.baidu.com/it/u=130573784,2479509663&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=534')
             .width(34)
             .aspectRatio(1)
             .borderRadius(17)
@@ -58,11 +73,11 @@ struct Setting {
         Column() {
           List() {
             ListItem() {
-              this.cellItem('头像')
+              this.cellItem('头像', ShowType.AVATAR)
             }
 
             ListItem() {
-              this.cellItem('昵称', '思密达')
+              this.cellItem('昵称', ShowType.NICKNAME)
             }
           }
           .width('100%')

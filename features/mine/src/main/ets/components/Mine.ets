@@ -1,10 +1,20 @@
 import router from '@ohos.router'
-import { DeviceBuilder, ResManager } from '@hm/basic/Index'
+import { DeviceBuilder, getUserApi, ResManager, RouterConfig, UserData, UserDataModel } from '@hm/basic/Index'
 
 @Component
 export struct Mine {
   @StorageProp('topHeight')
   topHeight: number = 0
+  @State
+  user: UserDataModel = new UserDataModel({} as UserData)
+
+  aboutToAppear(): void {
+    this.getUser()
+  }
+
+  async getUser() {
+    this.user = await getUserApi()
+  }
 
   @Builder
   cellItem(title: string, url: string = '') {
@@ -38,7 +48,8 @@ export struct Mine {
           .padding({ top: this.topHeight })
         // 个人信息
         Column({ space: 5 }) {
-          Image('https://img2.baidu.com/it/u=130573784,2479509663&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=534')
+          Image(this.user.avatar ||
+            'https://img2.baidu.com/it/u=130573784,2479509663&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=534')
             .width(74)
             .aspectRatio(1)
             .borderRadius(37)
@@ -49,16 +60,22 @@ export struct Mine {
               radius: 21,
               color: '#0aa9941f'
             })
-          Text('刘大壮')
+          Text(this.user.nickName || '--')
             .fontSize(ResManager.EC_PAGE_TITLE_FS)
             .fontColor(ResManager.EC_MID_BLACK)
             .fontWeight(500)
-          Text('sijigaowa@163.com')
+          Text(this.user.username || '--')
             .fontSize(13)
             .fontColor(ResManager.EC_MID_59)
 
         }
         .margin({ top: 64 - this.topHeight })
+        .onClick(() => {
+          router.pushUrl({
+            url: RouterConfig.USER_SET_URL,
+            params: this.user
+          })
+        })
       }
       .width('100%')
       .height(330)

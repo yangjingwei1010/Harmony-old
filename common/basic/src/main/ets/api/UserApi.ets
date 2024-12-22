@@ -1,4 +1,4 @@
-import { LoginParams } from '../viewmodel'
+import { LoginParams, UserDataModel } from '../viewmodel'
 import { request } from '../utils'
 
 /**
@@ -12,4 +12,12 @@ export function loginApi(data: LoginParams): Promise<string> {
     method: 'post',
     data
   })
+}
+
+/**
+ * 获取登录用户信息
+ * @returns
+ */
+export function getUserApi(): Promise<UserDataModel> {
+  return request<UserDataModel>({ url: '/employee/user' })
 }
