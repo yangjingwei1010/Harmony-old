@@ -26,7 +26,9 @@ export struct EcDialogUpload {
         [cameraPicker.PickerMediaType.PHOTO, cameraPicker.PickerMediaType.VIDEO], pickerProfile);
       console.log("the pick pickerResult is:" + JSON.stringify(pickerResult));
       Log.info(pickerResult.resultUri)
-
+      if (pickerResult.resultUri) {
+        this.callback(pickerResult.resultUri)
+      }
     } catch (error) {
       promptAction.showToast({ message: '不支持拍照' })
       let err = error as BusinessError;

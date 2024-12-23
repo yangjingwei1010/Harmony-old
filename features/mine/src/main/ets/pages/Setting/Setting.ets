@@ -1,5 +1,10 @@
 import router from '@ohos.router'
-import { EcDialogUpload, ResManager, UserData, UserDataModel } from '@hm/basic/Index'
+import { EcDialogUpload, ResManager, updateUserAvatar, uploadApi, UserData, UserDataModel } from '@hm/basic/Index'
+import { Log } from '@abner/log'
+import { EcLoading } from '@itheima/wing-care'
+import { fileIo } from '@kit.CoreFileKit'
+import { FormData } from '@ohos/axios'
+import { promptAction } from '@kit.ArkUI'
 
 enum ShowType {
   NICKNAME,
@@ -17,10 +22,18 @@ struct Setting {
     builder: EcDialogUpload({
       callback: (url) => {
         this.user.avatar = url
+        this.upload(url)
         this.uploadDialog.close()
       }
     }),
     alignment: DialogAlignment.Bottom
+  })
+  // 全屏 loading 弹层
+  loading: CustomDialogController = new CustomDialogController({
+    builder: EcLoading({ tip: '上传中...' }),
+    customStyle: true,
+    autoCancel: false,
+    alignment: DialogAlignment.Center
   })
   @State
   user: UserDataModel = new UserDataModel({} as UserData)
@@ -30,6 +43,33 @@ struct Setting {
     if (params) {
       // 一定得判断 因为鸿蒙里面没有传值的情况下 params是个undefined
       this.user = params
+    }
+  }
+
+  async upload(url: string) {
+    try {
+      this.loading.open()
+      if (url) {
+        // 1.拷贝到沙箱 2.调用上传接口 得到上传之后的地址
+        const file = fileIo.openSync(url, fileIo.OpenMode.READ_ONLY)
+        // 生成一个目标文件的路径
+        const destPath = getContext().cacheDir + "/" + file.name
+        // interal://cache:
+        fileIo.copyFileSync(file.fd, destPath) // 拷贝到沙箱
+        const data = new FormData()
+        // 加上file的参数
+        data.append("file", `internal://cache/${file.name}`)
+        const res = await uploadApi(data) // 只是传到服务器了 但是并没有更改头像
+        // AlertDialog.show({ message: JSON.stringify(res) })
+        // 修改头像地址
+        await updateUserAvatar(res) // 修改用户头像
+        promptAction.showToast({ message: '修改用户头像成功' })
+        this.loading.close() // 关闭弹层
+      }
+
+    } catch (e) {
+      this.loading.close()
+      Log.error(e)
     }
   }
 

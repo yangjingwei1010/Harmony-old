@@ -21,3 +21,18 @@ export function loginApi(data: LoginParams): Promise<string> {
 export function getUserApi(): Promise<UserDataModel> {
   return request<UserDataModel>({ url: '/employee/user' })
 }
+
+/**
+ * 更新用户头像
+ * @param avatar
+ * @returns
+ */
+export function updateUserAvatar(avatar: string): Promise<null> {
+  return request<null>({
+    url: '/employee/user/updateAvatar',
+    method: 'put',
+    params: {
+      avatar
+    }
+  })
+}
