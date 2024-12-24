@@ -1,5 +1,14 @@
 import router from '@ohos.router'
-import { EcDialogUpload, ResManager, updateUserAvatar, uploadApi, UserData, UserDataModel } from '@hm/basic/Index'
+import {
+  EcDialogUpload,
+  getUserApi,
+  ResManager,
+  RouterConfig,
+  updateUserAvatar,
+  uploadApi,
+  UserData,
+  UserDataModel
+} from '@hm/basic/Index'
 import { Log } from '@abner/log'
 import { EcLoading } from '@itheima/wing-care'
 import { fileIo } from '@kit.CoreFileKit'
@@ -38,12 +47,17 @@ struct Setting {
   @State
   user: UserDataModel = new UserDataModel({} as UserData)
 
-  aboutToAppear(): void {
-    const params = router.getParams() as UserDataModel
-    if (params) {
-      // 一定得判断 因为鸿蒙里面没有传值的情况下 params是个undefined
-      this.user = params
-    }
+  onPageShow(): void {
+    // const params = router.getParams() as UserDataModel
+    // if (params) {
+    //   // 一定得判断 因为鸿蒙里面没有传值的情况下 params是个undefined
+    //   this.user = params
+    // }
+    this.getUser()
+  }
+
+  async getUser() {
+    this.user = await getUserApi()
   }
 
   async upload(url: string) {
@@ -65,6 +79,8 @@ struct Setting {
         await updateUserAvatar(res) // 修改用户头像
         promptAction.showToast({ message: '修改用户头像成功' })
         this.loading.close() // 关闭弹层
+        this.getUser()
+        getContext().eventHub.emit('updateUser')
       }
 
     } catch (e) {
@@ -88,7 +104,10 @@ struct Setting {
             .fontSize(ResManager.EC_NORMAL_FS)
             .onClick(() => {
               router.pushUrl({
-                url: 'pages/mine/NickNamePage'
+                url: RouterConfig.USER_NAME_URL,
+                params: {
+                  name: this.user.nickName
+                }
               })
             })
         } else {

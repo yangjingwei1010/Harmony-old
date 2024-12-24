@@ -8,6 +8,17 @@ export struct Mine {
   @StorageProp('userInfo')
   user: UserDataModel = new UserDataModel({} as UserData)
 
+  aboutToAppear(): void {
+    this.getUser()
+    getContext().eventHub.on('updateUser', () => {
+      this.getUser()
+    })
+  }
+
+  async getUser() {
+    this.user = await getUserApi()
+  }
+
   @Builder
   cellItem(title: string, url: string = '') {
     Row() {

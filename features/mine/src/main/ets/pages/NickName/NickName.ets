@@ -1,21 +1,34 @@
-import { ResManager } from '@hm/basic/Index';
+import { ResManager, updateUserNameApi } from '@hm/basic/Index';
+import { promptAction, router } from '@kit.ArkUI';
 
 @Entry
 @Component
 struct NickName {
   @StorageProp('topHeight')
   topHeight: number = 0
+  @State
+  nickName: string = ''
+
+  aboutToAppear(): void {
+    const params = router.getParams() as object
+    if (params && params['name']) {
+      this.nickName = params['name']
+    }
+  }
 
   // 提交
-  save() {
-
+  async save() {
+    await updateUserNameApi(this.nickName)
+    getContext().eventHub.emit('updateUser')
+    promptAction.showToast({ message: '修改昵称成功' })
+    router.back()
   }
 
   build() {
     Navigation() {
       Column() {
         // Text(this.nickname)
-        TextInput({ text: '', placeholder: '请输入昵称' })
+        TextInput({ text: $$this.nickName, placeholder: '请输入2-5个字符的昵称' })
           .height(50)
           .borderRadius(ResManager.EC_NORMAL_RD)
           .backgroundColor('#fff')
@@ -24,7 +37,7 @@ struct NickName {
         Button('保存', { type: ButtonType.Capsule })
           .margin({ top: 50 })
           .width(230)
-          .enabled(false)
+          .enabled(!!this.nickName && this.nickName.length >= 2 && this.nickName.length <= 5)
           .onClick(() => {
             this.save()
           })

@@ -36,3 +36,16 @@ export function updateUserAvatar(avatar: string): Promise<null> {
     }
   })
 }
+
+/**
+ * 更新用户昵称
+ * @param nickName
+ * @returns
+ */
+export function updateUserNameApi(nickName: string): Promise<null> {
+  return request<null>({
+    url: '/employee/user/updateNickname', method: 'put', params: {
+      nickName
+    }
+  })
+}
