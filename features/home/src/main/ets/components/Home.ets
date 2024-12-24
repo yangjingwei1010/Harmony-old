@@ -1,4 +1,4 @@
-import { DeviceBuilder, ResManager, CareBuilder } from '@hm/basic/Index'
+import { DeviceBuilder, ResManager, CareBuilder, UserDataModel, UserData, getUserApi } from '@hm/basic/Index'
 import router from '@ohos.router'
 
 @Component
@@ -43,6 +43,16 @@ export struct Home {
         }
       })
     })
+  }
+
+  async getUser() {
+    AppStorage.setOrCreate('userInfo', await getUserApi())
+  }
+
+  aboutToAppear(): void {
+    setTimeout(() => {
+      this.getUser()
+    }, 0)
   }
 
   build() {

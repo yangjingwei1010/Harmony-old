@@ -5,16 +5,8 @@ import { DeviceBuilder, getUserApi, ResManager, RouterConfig, UserData, UserData
 export struct Mine {
   @StorageProp('topHeight')
   topHeight: number = 0
-  @State
+  @StorageProp('userInfo')
   user: UserDataModel = new UserDataModel({} as UserData)
-
-  aboutToAppear(): void {
-    this.getUser()
-  }
-
-  async getUser() {
-    this.user = await getUserApi()
-  }
 
   @Builder
   cellItem(title: string, url: string = '') {
