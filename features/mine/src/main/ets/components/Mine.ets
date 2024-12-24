@@ -1,5 +1,13 @@
 import router from '@ohos.router'
-import { DeviceBuilder, getUserApi, ResManager, RouterConfig, UserData, UserDataModel } from '@hm/basic/Index'
+import {
+  DeviceBuilder,
+  getUserApi,
+  ResManager,
+  RouterConfig,
+  TokenManager,
+  UserData,
+  UserDataModel
+} from '@hm/basic/Index'
 
 @Component
 export struct Mine {
@@ -36,6 +44,41 @@ export struct Mine {
     .padding({ top: 14, bottom: 14 })
     .justifyContent(FlexAlign.SpaceBetween)
     .onClick(() => router.pushUrl({ url }))
+  }
+
+  logout() {
+    AlertDialog.show(
+      {
+        title: '提示',
+        subtitle: '',
+        message: '您确认退出登录吗',
+        autoCancel: true,
+        alignment: DialogAlignment.Bottom,
+        gridCount: 4,
+        offset: { dx: 0, dy: -20 },
+        primaryButton: {
+          value: '取消',
+          action: () => {
+
+          }
+        },
+        secondaryButton: {
+          enabled: true,
+          defaultFocus: true,
+          style: DialogButtonStyle.HIGHLIGHT,
+          value: '确定',
+          action: async () => {
+            // 删除token
+            await TokenManager.delUser()
+            router.clear() // 清空页面栈
+            // 跳转到登录栈
+            router.replaceUrl({
+              url: RouterConfig.LOGIN_URL
+            })
+          }
+        }
+      }
+    )
   }
 
   build() {
@@ -143,7 +186,9 @@ export struct Mine {
         .borderRadius(28)
         .backgroundColor('#fff')
         .margin({ top: 50 })
-
+        .onClick(() => {
+          this.logout()
+        })
 
     }
     .width('100%')
