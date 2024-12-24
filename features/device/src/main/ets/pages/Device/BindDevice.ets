@@ -28,6 +28,8 @@ struct BindDevice {
   // 1. 列表
   @State
   list: UnBindProductItem[] = []
+  @State
+  refreshNum: number = 0
   // 加载数据
   load = () => {
     // 请求数据
@@ -74,6 +76,8 @@ struct BindDevice {
   // 2. 产品选择和折叠
   // 加载更多和收起
   toggle(item: UnBindProductItem) {
+    item.isExpand = !item.isExpand
+    this.refreshNum++
   }
 
   // 选择某个产品下设备
@@ -153,6 +157,9 @@ struct BindDevice {
                   }
                   .fontColor(ResManager.EC_MAIN_COLOR)
                   .fontSize(ResManager.EC_SMALL_FS)
+                  .onClick(() => {
+                    this.toggle(item)
+                  })
                 }
                 .width('100%')
                 .padding({
@@ -218,7 +225,7 @@ struct BindDevice {
               ListItem() {
                 this.productItem(item)
               }
-            }
+            }, (item: UnBindProductItem) => `${JSON.stringify(item)}_${this.refreshNum}`
             )
           }
           .width('100%')
