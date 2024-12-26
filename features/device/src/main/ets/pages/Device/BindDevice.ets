@@ -3,22 +3,8 @@ import router from '@ohos.router'
 import { ResManager } from '@hm/basic/Index'
 import { util } from '@kit.ArkTS'
 import { Log } from '@abner/log'
-
-export interface DeviceItem {
-  iotId: string
-  nodeId: string
-  deviceName: string
-  isSelected: boolean
-}
-
-export interface UnBindProductItem {
-  productId: string
-  productName: string
-  // 是否展开：false 没有点击查看更多 | true 点击了查看更多
-  isExpand: boolean
-  deviceList: DeviceItem[]
-}
-
+import { DeviceItemModel, UnBindProductItemModel } from '../../viewmodel'
+import { getUnbindDeviceListApi } from '../../api'
 
 @Entry
 @Component
@@ -27,55 +13,18 @@ struct BindDevice {
   topHeight: number = 0
   // 1. 列表
   @State
-  list: UnBindProductItem[] = []
+  list: UnBindProductItemModel[] = []
   @State
   refreshNum: number = 0
   // 加载数据
-  load = () => {
+  load = async () => {
     // 请求数据
-    setTimeout(() => {
-      for (let index = 0; index < 3; index++) {
-        if (index === 0) {
-          this.list.push({
-            productId: util.generateRandomUUID(true),
-            productName: '智能血糖' + (this.list.length + 1),
-            isExpand: false,
-            deviceList: Array.from(Array(6))
-              .map((it: null, i: number) => {
-                let _dv: DeviceItem = {
-                  iotId: util.generateRandomUUID(true),
-                  nodeId: util.generateRandomUUID(true),
-                  deviceName: 'blood' + (i + 1),
-                  isSelected: false
-                }
-                return _dv
-              })
-          })
-        } else {
-          this.list.push({
-            productId: util.generateRandomUUID(true),
-            productName: '智能门禁' + (this.list.length + 1),
-            isExpand: false,
-            deviceList: Array.from(Array(10))
-              .map((it: null, i: number) => {
-                let _dv: DeviceItem = {
-                  iotId: util.generateRandomUUID(true),
-                  nodeId: util.generateRandomUUID(true),
-                  deviceName: 'door' + (i + 1),
-                  isSelected: false
-                }
-                return _dv
-              })
-          })
-        }
-
-      }
-    }, 1000)
+    this.list = await getUnbindDeviceListApi()
   }
 
   // 2. 产品选择和折叠
   // 加载更多和收起
-  toggle(item: UnBindProductItem) {
+  toggle(item: UnBindProductItemModel) {
     item.isExpand = !item.isExpand
     this.refreshNum++
   }
@@ -86,11 +35,11 @@ struct BindDevice {
    * @param item 当前选择产品
    * @param device 当前点击产品下的某个设备
    */
-  selectDevice(item: UnBindProductItem, device: DeviceItem) {
+  selectDevice(item: UnBindProductItemModel, device: DeviceItemModel) {
   }
 
   @Builder
-  productItem(item: UnBindProductItem) {
+  productItem(item: UnBindProductItemModel) {
     Column({ space: 18 }) {
       // 1. 产品分类
       Row() {
@@ -122,7 +71,7 @@ struct BindDevice {
       GridRow({ columns: 2, gutter: 10 }) {
         // 数据超出 6 同时没有点击查看更多
         if (item.deviceList?.length! > 6 && !item.isExpand) {
-          ForEach(item.deviceList?.slice(0, 6), (device: DeviceItem, i: number) => {
+          ForEach(item.deviceList?.slice(0, 6), (device: DeviceItemModel, i: number) => {
             GridCol() {
               // Column() {
               if (i < 5) {
@@ -178,7 +127,7 @@ struct BindDevice {
           }
           )
         } else {
-          ForEach(item.deviceList, (device: DeviceItem) => {
+          ForEach(item.deviceList, (device: DeviceItemModel) => {
             GridCol() {
               Column() {
                 Text(device.deviceName)
@@ -221,11 +170,11 @@ struct BindDevice {
           List({
             space: 10
           }) {
-            ForEach(this.list, (item: UnBindProductItem) => {
+            ForEach(this.list, (item: UnBindProductItemModel) => {
               ListItem() {
                 this.productItem(item)
               }
-            }, (item: UnBindProductItem) => `${JSON.stringify(item)}_${this.refreshNum}`
+            }, (item: UnBindProductItemModel) => `${JSON.stringify(item)}_${this.refreshNum}`
             )
           }
           .width('100%')
