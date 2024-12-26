@@ -3,7 +3,7 @@ import router from '@ohos.router'
 import { ResManager } from '@hm/basic/Index'
 import { util } from '@kit.ArkTS'
 import { Log } from '@abner/log'
-import { DeviceItemModel, UnBindProductItemModel } from '../../viewmodel'
+import { DeviceItem, DeviceItemModel, UnBindProductItem, UnBindProductItemModel } from '../../viewmodel'
 import { getUnbindDeviceListApi } from '../../api'
 
 @Entry
@@ -16,6 +16,10 @@ struct BindDevice {
   list: UnBindProductItemModel[] = []
   @State
   refreshNum: number = 0
+  @State
+  currentProduct: UnBindProductItemModel = new UnBindProductItemModel({} as UnBindProductItem)
+  @State
+  currentSelect: DeviceItemModel = new DeviceItemModel({} as DeviceItem)
   // 加载数据
   load = async () => {
     // 请求数据
@@ -36,6 +40,17 @@ struct BindDevice {
    * @param device 当前点击产品下的某个设备
    */
   selectDevice(item: UnBindProductItemModel, device: DeviceItemModel) {
+    this.list.forEach(prod => {
+      prod.deviceList.forEach(dev => {
+        if (dev.isSelected) {
+          dev.isSelected = false
+        }
+      })
+    })
+    device.isSelected = !device.isSelected
+    this.currentSelect = device
+    this.currentProduct = item
+    this.refreshNum++
   }
 
   @Builder
