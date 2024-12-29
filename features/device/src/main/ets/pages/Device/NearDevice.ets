@@ -1,6 +1,9 @@
 import { EcDialogTips } from '@itheima/wing-care'
 import router from '@ohos.router'
 import { ResManager } from '@hm/basic/Index'
+import { ble } from '@kit.ConnectivityKit'
+import { bluetoothManager } from '@kit.MDMKit'
+import { blueManager } from '../../utils'
 
 @Entry
 @Component
@@ -12,6 +15,12 @@ struct NearDevice {
   @State angle: number = 0
   step: number = 5
   timer: number = -1
+  @State
+  list: ble.ScanResult[] = []
+
+  aboutToAppear(): void {
+    this.reset()
+  }
 
   run() {
 
@@ -26,7 +35,12 @@ struct NearDevice {
 
   // 3. 搜索方法
   search() {
-
+    blueManager.scanDevice((res) => {
+      if (res.length) {
+        this.hasDeivce = true
+        this.list = res
+      }
+    })
   }
 
   // 重新搜索

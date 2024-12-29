@@ -1,8 +1,12 @@
-import { access } from '@kit.ConnectivityKit'
+import { access, ble } from '@kit.ConnectivityKit'
 import { abilityAccessCtrl, bundleManager, common } from '@kit.AbilityKit'
 import { promptAction } from '@kit.ArkUI'
+import { Log } from '@abner/log'
+import { BusinessError } from '@kit.BasicServicesKit'
 
 class BlueManager {
+  timer: number = -1
+
   // 检查蓝牙授权
   async checkBlue() {
     try {
@@ -58,6 +62,34 @@ class BlueManager {
   // 检查系统的蓝牙是否打开 true/打开 false/关闭
   checkBlueOpen() {
     return access.getState() === access.BluetoothState.STATE_ON
+  }
+
+  // 扫描蓝牙
+  scanDevice(callback: (res: ble.ScanResult[]) => void) {
+    try {
+      clearTimeout(this.timer) // 清除上一次的 重新开始
+      // 当找到蓝牙时会触发
+      const resList: ble.ScanResult[] = [] // 汇总所有的发现蓝牙
+      ble.on("BLEDeviceFind", (list: ble.ScanResult[]) => {
+        Log.info("扫描到的蓝牙列表：" + JSON.stringify(list))
+        // [1,2,3] [2]
+        resList.push(...list.filter(dv =>!resList.some(item => item.deviceId === dv.deviceId)))
+        // 告诉页面
+        callback(resList) // 回传汇总的数据
+      });
+      let scanOptions: ble.ScanOptions = {
+        interval: 500,
+        dutyMode: ble.ScanDuty.SCAN_MODE_LOW_POWER,
+        matchMode: ble.MatchMode.MATCH_MODE_AGGRESSIVE
+      }
+      ble.startBLEScan(null, scanOptions);
+      this.timer = setTimeout(() => {
+        ble.stopBLEScan() // 停止扫描
+        ble.off("BLEDeviceFind") // 停止监听该事件
+      }, 5000)
+    } catch (err) {
+      Log.error('errCode: ' + (err as BusinessError).code + ', errMessage: ' + (err as BusinessError).message);
+    }
   }
 }
 
