@@ -42,7 +42,8 @@ class BlueManager {
 
       }
       // 已经有蓝牙权限
-      if (!this.checkBlueOpen()) {
+      // todo: 模拟蓝牙已经授权成功并且蓝牙开关已经打开
+      if (this.checkBlueOpen()) {
         // 检测开关是关着的
         promptAction.showToast({ message: JSON.stringify(access.getState()) })
         return Promise.reject(new Error("请首先打开蓝牙开关2"))

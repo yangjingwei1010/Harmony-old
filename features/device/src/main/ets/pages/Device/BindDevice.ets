@@ -3,7 +3,7 @@ import router from '@ohos.router'
 import { getDeviceMap, ResManager, RouterConfig } from '@hm/basic/Index'
 import { util } from '@kit.ArkTS'
 import { Log } from '@abner/log'
-import { DeviceItem, DeviceItemModel, UnBindProductItem, UnBindProductItemModel } from '../../viewmodel'
+import { currentLot, DeviceItem, DeviceItemModel, UnBindProductItem, UnBindProductItemModel } from '../../viewmodel'
 import { getUnbindDeviceListApi } from '../../api'
 import { blueManager } from '../../utils'
 import { promptAction } from '@kit.ArkUI'
@@ -61,6 +61,10 @@ struct BindDevice {
       const isOK = await blueManager.checkBlue() // 检查蓝牙是否授权
       promptAction.showToast({ message: isOK ? '授权成功' : "授权失败" })
       if (isOK) {
+        // 单利记录nodeId
+        currentLot.nodeId = this.currentSelect.nodeId
+        // 单利记录当前的iotId
+        currentLot.iotId = this.currentSelect.iotId
         // 进行下一步的通信 扫描蓝牙
         router.pushUrl({
           url: RouterConfig.DEVICE_NEAR_URL
