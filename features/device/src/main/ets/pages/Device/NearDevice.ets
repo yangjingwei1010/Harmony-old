@@ -4,6 +4,7 @@ import { ResManager } from '@hm/basic/Index'
 import { ble } from '@kit.ConnectivityKit'
 import { bluetoothManager } from '@kit.MDMKit'
 import { blueManager } from '../../utils'
+import { it } from '@ohos/hypium'
 
 @Entry
 @Component
@@ -170,16 +171,15 @@ struct NearDevice {
           // 设备列表
           List({ space: 10 }) {
             ForEach(
-              Array(20)
-                .fill(1),
-              (item: number, i: number) => {
+              this.list,
+              (item: ble.ScanResult, i: number) => {
                 ListItem() {
                   Row() {
                     Column({ space: 5 }) {
-                      Text('SKEY_6709')
+                      Text(item.deviceName || '未知设备')
                         .fontColor(ResManager.EC_MID_19)
                         .fontSize(ResManager.EC_NORMAL_FS)
-                      Text('C4:D8:16:51:76:09')
+                      Text(item.deviceId)
                         .fontColor(ResManager.EC_MID_99)
                         .fontSize(ResManager.EC_SMALL_FS)
                     }
