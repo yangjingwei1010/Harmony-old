@@ -1,4 +1,5 @@
-import { ResManager } from '@hm/basic/Index'
+import { ResManager, RouterConfig } from '@hm/basic/Index'
+import { router } from '@kit.ArkUI'
 
 @Entry
 @Component
@@ -12,6 +13,10 @@ struct ConnectNet {
   @State
   time: number = 10
   timer: number = -1
+  @State
+  wifiAccount: string = ''
+  @State
+  wifiPassword: string = ''
 
   run() {
     this.timer = setInterval(() => {
@@ -31,6 +36,13 @@ struct ConnectNet {
   // aboutToAppear() {
   //   this.run()
   // }
+
+  onPageShow(): void {
+    const params = router.getParams() as object
+    if (params && params['ssid']) {
+      this.wifiAccount = params['ssid']
+    }
+  }
 
   build() {
     Navigation() {
@@ -56,7 +68,7 @@ struct ConnectNet {
         .padding({ left: 20, bottom: 12, right: 20 })
         .alignItems(HorizontalAlign.Start)
 
-        Image('/images/img_wifi_demo.png')
+        Image($r('app.media.img_wifi_demo'))
           .width(330)
           .height(196)
         // 选择 wifi 连接
@@ -64,7 +76,7 @@ struct ConnectNet {
           List() {
             ListItem() {
               Row() {
-                Text('YJY-5G')
+                Text(this.wifiAccount || '--')
                   .fontColor(ResManager.EC_MID_19)
                   .fontSize(ResManager.EC_MODULE_TITLE_FS)
                   .fontWeight(500)
@@ -78,6 +90,9 @@ struct ConnectNet {
               .padding({ top: 14, bottom: 14 })
               .justifyContent(FlexAlign.SpaceBetween)
               .onClick(() => {
+                router.pushUrl({
+                  url: RouterConfig.DEVICE_DOOR_SCAN_WIFI_URL
+                })
               })
             }
 
@@ -89,13 +104,14 @@ struct ConnectNet {
                   .fontWeight(500)
 
                 Row() {
-                  TextInput({ placeholder: '请输入密码' })
+                  TextInput({ placeholder: '请输入密码', text: $$this.wifiPassword })
                     .placeholderColor(ResManager.EC_MID_99)
                     .placeholderFont({ size: ResManager.EC_NORMAL_FS })
                     .backgroundColor('#fff')
                     .width(150)
                     .textAlign(TextAlign.End)
                     .padding({ right: 20 })
+                    .type(InputType.Password)
                 }
               }
               .width('100%')

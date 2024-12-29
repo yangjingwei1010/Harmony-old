@@ -1,10 +1,18 @@
-import { ResManager } from '@hm/basic/Index'
+import { ResManager, RouterConfig } from '@hm/basic/Index'
+import wifiManager from '@ohos.wifiManager'
+import { router } from '@kit.ArkUI'
 
 @Entry
 @Component
 struct ScanWifi {
   @StorageProp('topHeight')
   topHeight: number = 0
+  @State
+  list: wifiManager.WifiScanInfo[] = []
+
+  scanWifi() {
+    this.list = wifiManager.getScanInfoList()
+  }
 
   build() {
     Navigation() {
@@ -27,16 +35,15 @@ struct ScanWifi {
         // 设备列表
         List({ space: 10 }) {
           ForEach(
-            Array(20)
-              .fill(1),
-            (item: number, i: number) => {
+            this.list,
+            (item: wifiManager.WifiScanInfo, i: number) => {
               ListItem() {
                 Row() {
                   Column({ space: 5 }) {
-                    Text(item + '')
+                    Text(item.ssid + '')
                       .fontColor(ResManager.EC_MID_19)
                       .fontSize(ResManager.EC_NORMAL_FS)
-                    Text(item + '')
+                    Text(item.bssid + '')
                       .fontColor(ResManager.EC_MID_99)
                       .fontSize(ResManager.EC_SMALL_FS)
                   }
@@ -57,6 +64,14 @@ struct ScanWifi {
                 .borderRadius(ResManager.EC_NORMAL_RD)
                 .backgroundColor('#fff')
               }
+              .onClick(() => {
+                router.back({
+                  url: RouterConfig.DEVICE_DOOR_NET_CONNECT_URL,
+                  params: {
+                    ssid: item.ssid
+                  }
+                })
+              })
             })
         }
         .layoutWeight(1)
