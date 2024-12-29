@@ -1,10 +1,12 @@
 import { EcDialogTips } from '@itheima/wing-care'
 import router from '@ohos.router'
-import { ResManager } from '@hm/basic/Index'
+import { ResManager, RouterConfig } from '@hm/basic/Index'
 import { ble } from '@kit.ConnectivityKit'
 import { bluetoothManager } from '@kit.MDMKit'
 import { blueManager } from '../../utils'
 import { it } from '@ohos/hypium'
+import { bindDeviceApi } from '../../api'
+import { currentLot } from '../../viewmodel'
 
 @Entry
 @Component
@@ -209,9 +211,28 @@ struct NearDevice {
                       .width(24)
                       .aspectRatio(1)
                       .onClick(() => {
-                        blueManager.connectBlue(item.deviceId, () => {
-                          this.isConnect = true
-                        })
+                        try {
+                          blueManager.connectBlue(item.deviceId, async () => {
+                            // 连接成功
+                            // 因为蓝牙连接成功了 所以可以绑定了
+                            this.isConnect = true
+                            await bindDeviceApi(currentLot.iotId!) // 物联网的id
+                            // 进入下一步
+                            router.pushUrl({
+                              url: RouterConfig.DEVICE_BIND_TIP_URL, // 进行配置网络页面
+                              params: {
+                                tips: 1 // 成功的提示
+                              }
+                            })
+                          })
+                        } catch (error) {
+                          router.pushUrl({
+                            url: RouterConfig.DEVICE_BIND_TIP_URL, // 进行配置网络页面
+                            params: {
+                              tips: 2 // 失败的提示
+                            }
+                          })
+                        }
                       })
                   }
                   .width('100%')

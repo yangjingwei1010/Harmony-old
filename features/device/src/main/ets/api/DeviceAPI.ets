@@ -9,3 +9,12 @@ import { UnBindProductItemModel } from '../viewmodel'
 export function getUnbindDeviceListApi(): Promise<UnBindProductItemModel[]> {
   return request<UnBindProductItemModel[]>({ url: '/employee/iot/deviceTree' })
 }
+
+/**
+ * 绑定设备
+ * @param iotId 物联网设备id
+ * @returns
+ */
+export function bindDeviceApi(iotId: string): Promise<null> {
+  return request({ url: `/employee/iot/bindingDevice/${iotId}`, method: 'put' })
+}
