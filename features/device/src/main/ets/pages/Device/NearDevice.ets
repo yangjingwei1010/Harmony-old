@@ -18,6 +18,8 @@ struct NearDevice {
   timer: number = -1
   @State
   list: ble.ScanResult[] = []
+  @State
+  isConnect: boolean = false
 
   aboutToAppear(): void {
     this.reset()
@@ -43,7 +45,7 @@ struct NearDevice {
     this.run()
     blueManager.scanDevice((res) => {
       if (res.length) {
-        this.list = res
+        this.list = res.filter(item => item.deviceName.startsWith('JL-ITHEIMA'))
       }
     })
     setTimeout(() => {
@@ -169,20 +171,22 @@ struct NearDevice {
         .backgroundColor('#fff')
       } else {
         Column() {
-          // 标题
-          Row() {
-            Text('未连接设备')
-              .fontColor(ResManager.EC_MID_19)
-              .fontSize(ResManager.EC_MODULE_TITLE_FS)
-              .fontWeight(500)
-            LoadingProgress()
-              .margin({ left: 10 })
-              .width(20)
-              .height(20)
-              .color(ResManager.EC_MID_99)
+          if (!this.isConnect) {
+            // 标题
+            Row() {
+              Text('未连接设备')
+                .fontColor(ResManager.EC_MID_19)
+                .fontSize(ResManager.EC_MODULE_TITLE_FS)
+                .fontWeight(500)
+              LoadingProgress()
+                .margin({ left: 10 })
+                .width(20)
+                .height(20)
+                .color(ResManager.EC_MID_99)
+            }
+            .width('100%')
+            .margin({ top: 18, bottom: 18 })
           }
-          .width('100%')
-          .margin({ top: 18, bottom: 18 })
 
           // 设备列表
           List({ space: 10 }) {
@@ -204,6 +208,11 @@ struct NearDevice {
                     Image($r('app.media.ic_sbbd_ly'))
                       .width(24)
                       .aspectRatio(1)
+                      .onClick(() => {
+                        blueManager.connectBlue(item.deviceId, () => {
+                          this.isConnect = true
+                        })
+                      })
                   }
                   .width('100%')
                   .justifyContent(FlexAlign.SpaceBetween)

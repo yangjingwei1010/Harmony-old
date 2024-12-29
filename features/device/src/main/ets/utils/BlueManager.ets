@@ -1,4 +1,4 @@
-import { access, ble } from '@kit.ConnectivityKit'
+import { access, ble, constant } from '@kit.ConnectivityKit'
 import { abilityAccessCtrl, bundleManager, common } from '@kit.AbilityKit'
 import { promptAction } from '@kit.ArkUI'
 import { Log } from '@abner/log'
@@ -6,6 +6,7 @@ import { BusinessError } from '@kit.BasicServicesKit'
 
 class BlueManager {
   timer: number = -1
+  currentClient: ble.GattClientDevice | null = null
 
   // 检查蓝牙授权
   async checkBlue() {
@@ -89,6 +90,21 @@ class BlueManager {
       }, 5000)
     } catch (err) {
       Log.error('errCode: ' + (err as BusinessError).code + ', errMessage: ' + (err as BusinessError).message);
+    }
+  }
+
+  // 连接蓝牙
+  connectBlue(deviceId: string, callback: () => void) {
+    if (deviceId) {
+      // 创建gatt的实例对象
+      this.currentClient = ble.createGattClientDevice(deviceId) // 和蓝牙通信的对象的实例
+      this.currentClient.on("BLEConnectionStateChange", (res) => {
+        if (res.state === constant.ProfileConnectionState.STATE_CONNECTED) {
+          callback() // 连接成功
+          promptAction.showToast({ message: '蓝牙连接成功' })
+        }
+      })
+      this.currentClient.connect() // 连接蓝牙
     }
   }
 }
