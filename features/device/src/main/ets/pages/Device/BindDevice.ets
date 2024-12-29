@@ -209,7 +209,7 @@ struct BindDevice {
                 url: 'pages/device/NearDevicePage'
               })
             })
-            .enabled(true ? true : false)
+            .enabled(!!this.currentSelect.iotId)
         }
         .justifyContent(FlexAlign.Center)
         .width('100%')
