@@ -1,11 +1,26 @@
 import { EcDialogTips } from '@itheima/wing-care'
-import { ResManager } from '@hm/basic/Index'
+import { ResManager, RouterConfig } from '@hm/basic/Index'
+import { wfManager } from '../../utils'
+import { router } from '@kit.ArkUI'
 
 @Entry
 @Component
 struct NetDoor {
   @StorageProp('topHeight')
   topHeight: number = 0
+  @State
+  isOk: boolean = false
+
+  // 检查当前手机的wifi权限是否开启
+  next() {
+    if (wfManager.checkWifi()) {
+      router.pushUrl({
+        url: RouterConfig.DEVICE_DOOR_NET_CONNECT_URL
+      })
+    } else {
+      this.wifiDialog.open()
+    }
+  }
 
   // 1. 未闪烁说明
   @Builder
@@ -146,7 +161,7 @@ struct NetDoor {
           Column() {
             Row() {
               Checkbox()
-                .select(true)
+                .select($$this.isOk)
                 .selectedColor(ResManager.EC_MAIN_COLOR)
               Text('指示灯闪烁')
                 .fontColor(ResManager.EC_MID_19)
@@ -159,6 +174,9 @@ struct NetDoor {
               .width(230)
               .margin({ bottom: 25 })
               .backgroundColor(ResManager.EC_MAIN_COLOR)
+              .onClick(() => {
+                this.next()
+              })
 
             Text('未看到指示灯闪烁')
               .fontColor(ResManager.EC_MAIN_COLOR)

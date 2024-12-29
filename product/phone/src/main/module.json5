@@ -25,9 +25,12 @@
         "usedScene": {
           "abilities": [ "EntryAbility"],
           "when":"inuse"
-        }
+        },
+      },
+      {
+        "name": "ohos.permission.GET_WIFI_INFO"
       }
-      ],
+    ],
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",
