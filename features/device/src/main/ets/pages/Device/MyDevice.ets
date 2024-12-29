@@ -1,8 +1,9 @@
 import { Device, DeviceCate, DeviceItemModel, UnBindProductItemModel } from '../../viewmodel/DeviceModel'
 import router from '@ohos.router'
 import { ResManager } from '@hm/basic/Index'
-import { getMyDeviceListApi } from '../../api'
+import { getMyDeviceListApi, unbindDeviceApi } from '../../api'
 import { getDeviceMap } from '@hm/basic/src/main/ets/utils/Device'
+import { promptAction } from '@kit.ArkUI'
 
 // 设备选择
 @Entry
@@ -23,7 +24,7 @@ struct MyDevice {
   }
 
   // 解绑
-  unbind() {
+  unbind(item: DeviceItemModel) {
     AlertDialog.show({
       title: '解除确认',
       message: '确认要解除该设备吗？',
@@ -37,8 +38,10 @@ struct MyDevice {
       secondaryButton: {
         value: '确定',
         fontColor: ResManager.EC_MAIN_COLOR,
-        action: () => {
-
+        action: async () => {
+          await unbindDeviceApi(item.iotId)
+          this.getMyDevices()
+          promptAction.showToast({ message: '解绑设备成功' })
         }
       },
       alignment: DialogAlignment.Center
@@ -88,7 +91,7 @@ struct MyDevice {
                           .fontSize(ResManager.EC_SMALL_FS)
                           .margin({ top: 10, right: 10 })
                           .onClick(() => {
-                            this.unbind()
+                            this.unbind(item)
                           })
 
                       }
