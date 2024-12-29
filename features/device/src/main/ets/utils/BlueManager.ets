@@ -3,6 +3,7 @@ import { abilityAccessCtrl, bundleManager, common } from '@kit.AbilityKit'
 import { promptAction } from '@kit.ArkUI'
 import { Log } from '@abner/log'
 import { BusinessError } from '@kit.BasicServicesKit'
+import { BlueData } from '../viewmodel'
 
 class BlueManager {
   timer: number = -1
@@ -106,6 +107,10 @@ class BlueManager {
       })
       this.currentClient.connect() // 连接蓝牙
     }
+  }
+
+  sendData(data: BlueData) {
+
   }
 }
 

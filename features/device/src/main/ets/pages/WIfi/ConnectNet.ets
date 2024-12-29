@@ -1,5 +1,6 @@
 import { ResManager, RouterConfig } from '@hm/basic/Index'
 import { router } from '@kit.ArkUI'
+import { BlueData } from '../../viewmodel'
 
 @Entry
 @Component
@@ -29,8 +30,17 @@ struct ConnectNet {
 
   // 开始连接网络
   start() {
+    // 开始连接状态
     this.linking = true
+    // 连接设置一个10s倒计时
     this.run()
+    // 组装数据
+    let data: BlueData = {
+      command: 'wifi',
+      data: [this.wifiAccount, this.wifiPassword]
+    }
+    // 实现通过蓝牙给门禁发送数据
+
   }
 
   // aboutToAppear() {
@@ -138,6 +148,7 @@ struct ConnectNet {
           .margin({ top: 50 })
           .width(230)
           .backgroundColor(ResManager.EC_MAIN_COLOR)
+          .enabled(!!(this.wifiAccount && this.wifiPassword))
           .onClick(() => {
             this.start()
           })
