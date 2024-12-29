@@ -23,8 +23,11 @@ struct NearDevice {
     this.reset()
   }
 
+  // 动画
   run() {
-
+    this.timer = setInterval(() => {
+      this.angle += this.step
+    }, 1000 / 60)
   }
 
   // 2. 搜索状态：true 搜索中 | false 结束搜索
@@ -32,22 +35,29 @@ struct NearDevice {
   isSearch: boolean = true
   // true 发现设备 ｜false没有发现设备
   @State
-  hasDeivce: boolean = false
+  hasDevice: boolean = false
 
   // 3. 搜索方法
   search() {
+    // 开始动画
+    this.run()
     blueManager.scanDevice((res) => {
       if (res.length) {
-        this.hasDeivce = true
         this.list = res
       }
     })
+    setTimeout(() => {
+      if (this.list.length) {
+        this.hasDevice = true
+      }
+      clearInterval(this.timer)
+    }, 5000)
   }
 
   // 重新搜索
   reset() {
     this.isSearch = true
-    this.hasDeivce = false
+    this.hasDevice = false
     this.search()
   }
 
@@ -101,13 +111,19 @@ struct NearDevice {
 
   build() {
     Navigation() {
-      if (!this.hasDeivce) {
+      if (!this.hasDevice) {
         Stack({ alignContent: Alignment.Bottom }) {
           // 搜索中：无设备
           Column() {
             Image(ResManager.IC_FJSB_SS)
               .width(180)
               .aspectRatio(1)
+              .rotate({
+                angle: this.angle
+              })
+              .animation({
+                duration: 500
+              })
 
             if (this.isSearch) {
               Text('正在查找附近可连接设备')
@@ -208,7 +224,7 @@ struct NearDevice {
         .width('100%')
         .padding({ left: 15, right: 15 })
         .height('100%')
-        .backgroundColor(this.hasDeivce ? ResManager.EC_MID_BG : '#fff')
+        .backgroundColor(this.hasDevice ? ResManager.EC_MID_BG : '#fff')
       }
 
     }
