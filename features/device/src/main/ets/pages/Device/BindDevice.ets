@@ -1,10 +1,12 @@
 import { EcDialogTips } from '@itheima/wing-care'
 import router from '@ohos.router'
-import { ResManager } from '@hm/basic/Index'
+import { getDeviceMap, ResManager, RouterConfig } from '@hm/basic/Index'
 import { util } from '@kit.ArkTS'
 import { Log } from '@abner/log'
 import { DeviceItem, DeviceItemModel, UnBindProductItem, UnBindProductItemModel } from '../../viewmodel'
 import { getUnbindDeviceListApi } from '../../api'
+import { blueManager } from '../../utils'
+import { promptAction } from '@kit.ArkUI'
 
 @Entry
 @Component
@@ -53,12 +55,28 @@ struct BindDevice {
     this.refreshNum++
   }
 
+  async bindDevice() {
+    try {
+      // 这里面检查蓝牙
+      const isOK = await blueManager.checkBlue() // 检查蓝牙是否授权
+      promptAction.showToast({ message: isOK ? '授权成功' : "授权失败" })
+      if (isOK) {
+        // 进行下一步的通信 扫描蓝牙
+        router.pushUrl({
+          url: RouterConfig.DEVICE_NEAR_URL
+        })
+      }
+    } catch (error) {
+      promptAction.showToast({ message: error.message })
+    }
+  }
+
   @Builder
   productItem(item: UnBindProductItemModel) {
     Column({ space: 18 }) {
       // 1. 产品分类
       Row() {
-        Text(item.productName)
+        Text(getDeviceMap(item.productName)?.cn || '--')
           .fontColor(ResManager.EC_MID_19)
           .fontSize(ResManager.EC_MODULE_TITLE_FS)
           .fontWeight(500)
@@ -205,9 +223,11 @@ struct BindDevice {
             .width(312)
             .backgroundColor(ResManager.EC_MAIN_COLOR)
             .onClick(() => {
-              router.pushUrl({
-                url: 'pages/device/NearDevicePage'
-              })
+              // 检查蓝牙是否授权
+              this.bindDevice()
+              // router.pushUrl({
+              //   url: 'pages/device/NearDevicePage'
+              // })
             })
             .enabled(!!this.currentSelect.iotId)
         }
