@@ -1,6 +1,8 @@
-import { Device, DeviceCate } from '../../viewmodel/DeviceModel'
+import { Device, DeviceCate, DeviceItemModel, UnBindProductItemModel } from '../../viewmodel/DeviceModel'
 import router from '@ohos.router'
 import { ResManager } from '@hm/basic/Index'
+import { getMyDeviceListApi } from '../../api'
+import { getDeviceMap } from '@hm/basic/src/main/ets/utils/Device'
 
 // 设备选择
 @Entry
@@ -9,34 +11,16 @@ struct MyDevice {
   @StorageProp('topHeight')
   topHeight: number = 0
   scroller: Scroller = new Scroller()
-  private devices: DeviceCate[] = [
-    {
-      title: '智能门禁',
-      list: [
-        {
-          name: 'smoke alarm 001',
-          icon: $r("app.media.pic_shebei_mj")
-        },
-        {
-          name: 'smoke alarm 002',
-          icon: $r("app.media.pic_shebei_mj")
-        },
-      ]
-    },
-    {
-      title: '智能血糖仪',
-      list: [
-        {
-          name: 'Glucose meter 001',
-          icon: '/images/img_xzsb_dgncgq.png'
-        },
-        {
-          name: 'Glucose meter 002',
-          icon: '/images/img_xzsb_mcgyq.png'
-        }
-      ]
-    }
-  ]
+  @State
+  devices: UnBindProductItemModel[] = []
+
+  async getMyDevices() {
+    this.devices = await getMyDeviceListApi()
+  }
+
+  aboutToAppear(): void {
+    this.getMyDevices()
+  }
 
   // 解绑
   unbind() {
@@ -68,24 +52,24 @@ struct MyDevice {
         // 设备列表
         Scroll(this.scroller) {
           Column({ space: 20 }) {
-            ForEach(this.devices, (item: DeviceCate) => {
+            ForEach(this.devices, (prod: UnBindProductItemModel) => {
               Column() {
                 // 标题
-                Text(item.title)
+                Text(getDeviceMap(prod.productName)?.cn)
                   .fontColor(ResManager.EC_MID_19)
                   .fontSize(ResManager.EC_MODULE_TITLE_FS)
                   .fontWeight(500)
                   .margin({ bottom: 18 })
                 // 内容
                 GridRow({ columns: 2, gutter: { x: 10, y: 10 } }) {
-                  ForEach(item.list, (item: Device, i: number) => {
+                  ForEach(prod.deviceList, (item: DeviceItemModel, i: number) => {
                     GridCol() {
                       Stack({ alignContent: Alignment.TopEnd }) {
                         Column({ space: 10 }) {
-                          Image(item.icon)
+                          Image(getDeviceMap(prod.productName)?.icon)
                             .width(80)
                             .aspectRatio(1)
-                          Text(item.name)
+                          Text(item.deviceName)
                             .fontColor(ResManager.EC_MID_19)
                             .fontSize(ResManager.EC_SMALL_FS)
                         }
