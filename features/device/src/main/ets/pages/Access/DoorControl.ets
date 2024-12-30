@@ -1,5 +1,10 @@
-import { ResManager } from '@hm/basic/Index'
+import { ResManager, RouterConfig } from '@hm/basic/Index'
 import router from '@ohos.router'
+import { getDeviceStatusApi } from '../../api'
+import { DeviceStatusData, DeviceStatusDataModel } from '../../viewmodel'
+import { EcLoading } from '@itheima/wing-care'
+import { blueManager } from '../../utils'
+import { promptAction } from '@kit.ArkUI'
 
 class ControlItem {
   name: string = ''
@@ -13,11 +18,65 @@ struct DoorControl {
   topHeight: number = 0
   // 控制列表
   list: ControlItem[] = [
-    { name: '蓝牙开门', url: 'pages/device/access_control/BluetoothOpenPage' },
-    { name: '远程开门', url: 'pages/device/access_control/RemoteOpenPage' },
-    { name: '临时密码', url: 'pages/device/access_control/TempPasswordPage' },
-    { name: '开门记录', url: 'pages/device/access_control/OpeningRecordPage' },
+    { name: '蓝牙开门', url: RouterConfig.DEVICE_DOOR_BLUE_OPEN_URL },
+    { name: '远程开门', url: RouterConfig.DEVICE_DOOR_REMOTE_OPEN_URL },
+    { name: '临时密码', url: RouterConfig.DEVICE_DOOR_PASSWORD_URL },
+    { name: '开门记录', url: RouterConfig.DEVICE_DOOR_OPEN_RECORD_URL },
   ]
+  @State
+  deviceStatus: DeviceStatusDataModel = new DeviceStatusDataModel({} as DeviceStatusData)
+  // 是否连接到设备
+  @State
+  isLink: boolean = false
+  // 全屏 loading 弹层
+  loading: CustomDialogController = new CustomDialogController({
+    builder: EcLoading({ tip: '连接设备中...' }),
+    customStyle: true,
+    autoCancel: false,
+    alignment: DialogAlignment.Center
+  })
+
+  aboutToAppear(): void {
+    this.getDeviceStatus()
+    this.connect()
+  }
+
+  onBackPress(): boolean | void {
+    blueManager.destroy()
+  }
+
+  async getDeviceStatus() {
+    const params = router.getParams() as object
+    if (params && params["iotId"]) {
+      this.deviceStatus = await getDeviceStatusApi(params["iotId"])
+    }
+  }
+
+  async connect() {
+    this.loading.open()
+    try {
+      const isConnect = await blueManager.checkBlue()
+      if (isConnect) {
+        blueManager.scanDevice((list) => {
+          if (!this.isLink) {
+            const blue = list.find(item => item.deviceName.startsWith('JL-ITHEIMA'))
+            if (blue) {
+              blueManager.connectBlue(blue[0].deviceId, () => {
+                this.isLink = true
+                this.loading.close()
+              })
+            }
+          }
+        })
+      } else {
+        promptAction.showToast({ message: '请先打开蓝牙' })
+        this.loading.close()
+      }
+    } catch (error) {
+      this.loading.close()
+      promptAction.showToast({ message: '没找到设备' })
+    }
+  }
 
   @Builder
   cellItem(title: string, url: string = '') {
@@ -42,11 +101,11 @@ struct DoorControl {
     Navigation() {
       //  1. 设备信息
       Column({ space: 8 }) {
-        Text('smoke alarm 002')
+        Text(this.deviceStatus.name)
           .fontColor(ResManager.EC_MID_19)
           .fontSize(ResManager.EC_MODULE_TITLE_FS)
           .margin({ top: 20 })
-        Text('在线')
+        Text(this.deviceStatus.status === 'ONLINE' ? '在线' : '离线')
           .fontColor('#fff')
           .fontSize(ResManager.EC_SMALL_FS)
           .padding({

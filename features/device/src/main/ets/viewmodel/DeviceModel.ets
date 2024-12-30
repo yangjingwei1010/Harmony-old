@@ -1,11 +1,11 @@
 export class Device {
   name: string = ''
-  icon: Resource | string=''
+  icon: Resource | string = ''
 }
 
 export class DeviceCate {
   title: string = ''
-  list: Device[]=[]
+  list: Device[] = []
   cb?: () => void = () => {
   }
 }
@@ -25,6 +25,7 @@ export interface UnBindProductItem {
   isExpand: boolean
   deviceList: DeviceItem[]
 }
+
 export class DeviceItemModel implements DeviceItem {
   iotId: string = ''
   nodeId: string = ''
@@ -38,6 +39,7 @@ export class DeviceItemModel implements DeviceItem {
     this.isSelected = model.isSelected
   }
 }
+
 export class UnBindProductItemModel implements UnBindProductItem {
   productId: string = ''
   productName: string = ''
@@ -58,4 +60,23 @@ export interface BlueData {
   msg?: string // 消息提示
   command?: 'open' | 'wifi'
   data?: string[] // 例如wifi=》 [ssid,pwd]
+}
+
+// 设备状态查询
+export interface DeviceStatusData {
+  /** 设备名称 */
+  name: string;
+
+  /** 设备状态，设备状态，ONLINE：设备在线，OFFLINE：设备离线，ABNORMAL：设备异常，INACTIVE：设备未激活，FROZEN：设备冻结 */
+  status: string;
+}
+
+export class DeviceStatusDataModel implements DeviceStatusData {
+  name: string = ''
+  status: string = ''
+
+  constructor(model: DeviceStatusData) {
+    this.name = model.name
+    this.status = model.status
+  }
 }

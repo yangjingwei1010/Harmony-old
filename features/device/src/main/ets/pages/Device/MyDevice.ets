@@ -1,6 +1,6 @@
 import { Device, DeviceCate, DeviceItemModel, UnBindProductItemModel } from '../../viewmodel/DeviceModel'
 import router from '@ohos.router'
-import { ResManager } from '@hm/basic/Index'
+import { ResManager, RouterConfig } from '@hm/basic/Index'
 import { getMyDeviceListApi, unbindDeviceApi } from '../../api'
 import { getDeviceMap } from '@hm/basic/src/main/ets/utils/Device'
 import { promptAction } from '@kit.ArkUI'
@@ -82,7 +82,10 @@ struct MyDevice {
                         .backgroundColor(ResManager.EC_MID_WHITE)
                         .onClick(() => {
                           router.pushUrl({
-                            url: 'pages/device/access_control/DoorControlPage'
+                            url: RouterConfig.DEVICE_DOOR_CONTROL_URL,
+                            params: {
+                              iotId: item.iotId
+                            }
                           })
                         })
 

@@ -1,5 +1,5 @@
 import { request } from '@hm/basic'
-import { UnBindProductItemModel } from '../viewmodel'
+import { DeviceStatusDataModel, UnBindProductItemModel } from '../viewmodel'
 
 /**
  * iot 平台 api
@@ -32,4 +32,13 @@ export function getMyDeviceListApi(): Promise<UnBindProductItemModel[]> {
  * **/
 export function unbindDeviceApi(iotId: string): Promise<null> {
   return request({ url: `/employee/iot/unBindingDevice/${iotId}`, method: 'put' })
+}
+
+/**
+ * 获取设备状态
+ * @param iotId 物联网设备id
+ * @returns
+ */
+export function getDeviceStatusApi(iotId: string): Promise<DeviceStatusDataModel> {
+  return request<DeviceStatusDataModel>({ url: `/employee/iot/getDeviceStatus/${iotId}` })
 }

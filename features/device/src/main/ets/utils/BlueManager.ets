@@ -153,6 +153,15 @@ class BlueManager {
       promptAction.showToast({ message: '发送数据失败，' + error.message })
     }
   }
+
+  // 销毁蓝牙连接
+  destroy() {
+    if (this.currentClient) {
+      this.currentClient.disconnect()
+      this.currentClient.close()
+      this.currentClient = null
+    }
+  }
 }
 
 export const blueManager = new BlueManager()
