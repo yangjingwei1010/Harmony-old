@@ -2,8 +2,9 @@ import { access, ble, constant } from '@kit.ConnectivityKit'
 import { abilityAccessCtrl, bundleManager, common } from '@kit.AbilityKit'
 import { promptAction } from '@kit.ArkUI'
 import { Log } from '@abner/log'
-import { BusinessError } from '@kit.BasicServicesKit'
+import { BusinessError, emitter } from '@kit.BasicServicesKit'
 import { BlueData } from '../viewmodel'
+import { util } from '@kit.ArkTS'
 
 class BlueManager {
   timer: number = -1
@@ -99,18 +100,58 @@ class BlueManager {
     if (deviceId) {
       // 创建gatt的实例对象
       this.currentClient = ble.createGattClientDevice(deviceId) // 和蓝牙通信的对象的实例
-      this.currentClient.on("BLEConnectionStateChange", (res) => {
+      this.currentClient.on("BLEConnectionStateChange", async (res) => {
         if (res.state === constant.ProfileConnectionState.STATE_CONNECTED) {
           callback() // 连接成功
           promptAction.showToast({ message: '蓝牙连接成功' })
+          this.currentClient?.on('BLECharacteristicChange', (res) => {
+            const td = util.TextDecoder.create()
+            const buffer = new Uint8Array(res.characteristicValue)
+            const result = JSON.parse(td.decodeWithStream(buffer)) as BlueData
+            if (result.command === 'wifi') {
+              emitter.emit('WifiConnect', {
+                data: {
+                  status: result.status
+                }
+              })
+            }
+          })
+          const serviceList = await this.currentClient?.getServices() // 获取所有服务
+          const ser = serviceList?.find(item => item.serviceUuid.startsWith('0000AE30'))
+          const messageObj = ser?.characteristics.find(item => item.characteristicUuid.startsWith('0000AE04'))!
+          await this.currentClient?.setCharacteristicChangeNotification(messageObj, true)
         }
       })
       this.currentClient.connect() // 连接蓝牙
     }
   }
 
-  sendData(data: BlueData) {
-
+  async sendData(data: BlueData) {
+    try {
+      // 发送数据
+      if (this.currentClient) {
+        const list = await this.currentClient?.getServices()
+        const doorService = list.find(item => item.serviceUuid.startsWith("0000AE30")) // 找到门禁服务
+        if (doorService) {
+          // 再找门禁服务的读写特征值的对象
+          const writeObj =
+            doorService.characteristics.find(item => item.characteristicUuid.startsWith("0000AE10")) // 写入特征值
+          if (writeObj) {
+            const encoder = new util.TextEncoder() // 生成一个编码对象
+            const unit8Array = encoder.encodeInto(JSON.stringify(data))
+            // 有了写入特征值 就可以通过蓝牙进行通信了
+            await this.currentClient.writeCharacteristicValue({
+              serviceUuid: writeObj.serviceUuid,
+              characteristicUuid: writeObj.characteristicUuid,
+              characteristicValue: unit8Array.buffer, // 将数据转化成二进制的arrayBuffer
+              descriptors: []// 要写入的数据,
+            }, ble.GattWriteType.WRITE)
+          }
+        }
+      }
+    } catch (error) {
+      promptAction.showToast({ message: '发送数据失败，' + error.message })
+    }
   }
 }
 

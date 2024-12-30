@@ -1,6 +1,9 @@
 import { ResManager, RouterConfig } from '@hm/basic/Index'
-import { router } from '@kit.ArkUI'
+import { promptAction, router } from '@kit.ArkUI'
 import { BlueData } from '../../viewmodel'
+import { blueManager } from '../../utils'
+import { Log } from '@abner/log'
+import { emitter } from '@kit.BasicServicesKit'
 
 @Entry
 @Component
@@ -29,23 +32,35 @@ struct ConnectNet {
   }
 
   // 开始连接网络
-  start() {
+  async start() {
     // 开始连接状态
     this.linking = true
     // 连接设置一个10s倒计时
     this.run()
-    // 组装数据
-    let data: BlueData = {
-      command: 'wifi',
-      data: [this.wifiAccount, this.wifiPassword]
+    try {
+      // 组装数据
+      let data: BlueData = {
+        command: 'wifi',
+        data: [this.wifiAccount, this.wifiPassword]
+      }
+      const isOk = await blueManager.sendData(data) // 发送数据
+      // promptAction.showToast({ message: isOk ? "发送账号成功" : "发送账号失败" })
+      // 实现通过蓝牙给门禁发送数据
+    } catch (error) {
+      Log.error(error)
     }
-    // 实现通过蓝牙给门禁发送数据
-
   }
 
-  // aboutToAppear() {
-  //   this.run()
-  // }
+  aboutToAppear() {
+    emitter.on('WifiConnect', (res) => {
+      router.pushUrl({
+        url: RouterConfig.DEVICE_DOOR_CONNECT_TIP_URL,
+        params: {
+          tips: res.data?.status === 200 ? 1 : 2
+        }
+      })
+    })
+  }
 
   onPageShow(): void {
     const params = router.getParams() as object
